@@ -12,10 +12,9 @@ function GatewayList() {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     console.error('Token não encontrado no localStorage');
-                    return;
+                    navigate('/user-login');
                 }
 
-                console.log('Token:', token);  // Adiciona um log do token
                 const response = await axios.get('http://localhost:8080/gateway', {
                     headers: {
                         'Content-Type': 'application/json',
@@ -25,10 +24,6 @@ function GatewayList() {
                 setGateways(response.data); // Certifique-se de que isso seja um array de objetos gateway
             } catch (error) {
                 console.error('Erro ao buscar os gateways:', error);
-                if (error.response) {
-                    console.error('Erro status:', error.response.status);
-                    console.error('Erro data:', error.response.data);
-                }
             }
         };
 
@@ -55,16 +50,13 @@ function GatewayList() {
             setGateways(gateways.filter(gateway => gateway.gatewayid !== id));
         } catch (error) {
             console.error('Erro ao deletar o gateway:', error);
-            if (error.response) {
-                console.error('Erro status:', error.response.status);
-                console.error('Erro data:', error.response.data);
-            }
         }
     };
 
     return (
         <div>
-            <h1>Lista de Gateways</h1>
+            <h1 className="pagination justify-content-center mt-4">Lista de Gateways</h1>
+            <button className="btn btn-primary mt-4"  onClick={() => navigate('/gateway/new')}>Adicionar Gateway</button>
             <table className="table table-striped">
                 <thead>
                     <tr>
@@ -106,7 +98,6 @@ function GatewayList() {
                     ))}
                 </tbody>
             </table>
-            <button onClick={() => navigate('/gateway/new')}>Adicionar Gateway</button>
         </div>
     );
 }

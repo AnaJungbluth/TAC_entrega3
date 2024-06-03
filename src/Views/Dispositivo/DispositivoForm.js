@@ -75,7 +75,7 @@ function DispositivoForm() {
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('Token de autenticação não encontrado.');
-        return;
+        navigate('/user-login');
       }
 
       const payload = { nome, descricao, localizacao, gatewayid: selectedGateway };
@@ -107,45 +107,48 @@ function DispositivoForm() {
   };
 
   const handleCancel = () => {
-    navigate('/'); // Navega para a página inicial ou para outra rota ao cancelar
+    navigate('/dispositivo'); // Navega para a página inicial ou para outra rota ao cancelar
   };
 
   return (
     <div>
-      <h1>{id ? 'Editar Dispositivo' : 'Cadastrar Dispositivo'}</h1>
+      <h1 className="pagination justify-content-center mt-4">{id ? 'Editar Dispositivo' : 'Cadastrar Dispositivo'}</h1>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="name">Nome:</label>
-          <input
+      <fieldset className="form-group">
+          <label className="form-label" htmlFor="name">Nome:</label>
+          <input className="form-control"
             type="text"
             id="name"
             name="name"
             value={nome}
             onChange={(e) => setName(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="descricao">Descrição:</label>
-          <input
+        </fieldset>
+
+        <fieldset className="form-group">
+          <label className="form-label" htmlFor="descricao">Descrição:</label>
+          <input className="form-control"
             type="text"
             id="descricao"
             name="descricao"
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="localizacao">Localização:</label>
-          <input
+        </fieldset>
+
+        <fieldset className="form-group">
+          <label className="form-label" htmlFor="localizacao">Localização:</label>
+          <input className="form-control"
             type="text"
             id="localizacao"
             name="localizacao"
             value={localizacao}
             onChange={(e) => setLocalizacao(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="gateway">Gateway:</label>
+        </fieldset>
+
+        <fieldset className="form-group">
+          <label className="form-label" htmlFor="gateway">Gateway:</label>
           <select
             id="gateway"
             name="gateway"
@@ -158,9 +161,12 @@ function DispositivoForm() {
               <option key={gateway.gatewayid} value={gateway.gatewayid}>{gateway.nome}</option>
             ))}
           </select>
+          </fieldset>
+
+        <div className="pagination justify-content-center mt-4">
+          <button className="btn btn-success me-1" type="submit">{id ? 'Salvar' : 'Enviar'}</button>
+          <button className="btn btn-secondary" type="button" onClick={handleCancel}>Cancelar</button>
         </div>
-        <button type="submit">{id ? 'Salvar' : 'Enviar'}</button>
-        <button type="button" onClick={handleCancel}>Cancelar</button>
       </form>
     </div>
   );

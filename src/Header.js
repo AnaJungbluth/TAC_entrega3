@@ -3,16 +3,16 @@ import './App.css';
 
 function Header() {
   const navigate = useNavigate();
-  
+
   return (
-    <header className="app-header">
-      <div className="header-content">
-        <span>Minha App</span>
+    <header className="header">
+      <div className="header-content d-flex align-items-center justify-content-between">
+        <span style={{ color: 'black', fontSize: '24px', fontWeight: 'bold' }}>IoT Nexus</span>
         <div className="header-buttons">
-        <button onClick={() => navigate('/user-add')}>Cadastrar</button>
-        <button onClick={() => navigate('/user-login')}>Login</button>
+          <button className="btn btn-success me-1" onClick={() => navigate('/user-add')}>Cadastrar</button>
+          <button className="btn btn-secondary" onClick={() => navigate('/user-login')}>Login</button>
+        </div>
       </div>
-      </div>   
     </header>
   );
 }

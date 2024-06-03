@@ -43,7 +43,7 @@ function GatewayForm() {
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('Token de autenticação não encontrado.');
-        return;
+        navigate('/user-login');
       }
       const userId = localStorage.getItem('userId');
       const payload = { nome, descricao, pessoaid: userId };
@@ -75,35 +75,39 @@ function GatewayForm() {
   };
 
   const handleCancel = () => {
-    navigate('/'); // Navega para a página inicial ou para outra rota ao cancelar
+    navigate('/gateway'); // Navega para a página inicial ou para outra rota ao cancelar
   };
 
   return (
     <div>
-      <h1>{id ? 'Editar Gateway' : 'Cadastrar Gateway'}</h1>
+      <h1 className="pagination justify-content-center mt-4">{id ? 'Editar Gateway' : 'Cadastrar Gateway'}</h1>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="name">Nome:</label>
-          <input
+      <fieldset className="form-group">
+          <label className="form-label" htmlFor="name">Nome:</label>
+          <input className="form-control"
             type="text"
             id="name"
             name="name"
             value={nome}
             onChange={(e) => setName(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="descricao">Descrição:</label>
-          <input
+        </fieldset>
+
+        <fieldset className="form-group">
+          <label className="form-label" htmlFor="descricao">Descrição:</label>
+          <input className="form-control"
             type="text"
             id="descricao"
             name="descricao"
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
           />
+        </fieldset>
+
+        <div className="pagination justify-content-center mt-4">
+          <button className="btn btn-success me-1" type="submit">{id ? 'Salvar' : 'Enviar'}</button>
+          <button className="btn btn-secondary" type="button" onClick={handleCancel}>Cancelar</button>
         </div>
-        <button type="submit">{id ? 'Salvar' : 'Enviar'}</button>
-        <button type="button" onClick={handleCancel}>Cancelar</button>
       </form>
     </div>
   );

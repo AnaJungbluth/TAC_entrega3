@@ -1,23 +1,27 @@
-import { BrowserRouter, useNavigate } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import './App.css';
 import AppRoutes from './AppRoutes';
+import { useState } from 'react';
+import HeaderHome from './Views/HeaderHome';
 import Header from './Header';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   return (
     <BrowserRouter>
-      <Header />
-      <AppContent />
+      {isAuthenticated ? <HeaderHome /> : <Header />}
+      <AppContent setIsAuthenticated={setIsAuthenticated} />
     </BrowserRouter>
   );
 }
 
-function AppContent() {
+function AppContent({ setIsAuthenticated }) {
   return (
     <>
       <hr />
       <main>
-        <AppRoutes />
+        <AppRoutes setIsAuthenticated={setIsAuthenticated} />
       </main>
       <hr />
       <footer>Feito na UTF-MD</footer>

@@ -12,7 +12,7 @@ function DispositivoList() {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     console.error('Token não encontrado no localStorage');
-                    return;
+                    navigate('/user-login');
                 }
 
                 console.log('Token:', token);  // Adiciona um log do token
@@ -25,10 +25,6 @@ function DispositivoList() {
                 setDispositivo(response.data); // Certifique-se de que isso seja um array de objetos gateway
             } catch (error) {
                 console.error('Erro ao buscar os dispositivos:', error);
-                if (error.response) {
-                    console.error('Erro status:', error.response.status);
-                    console.error('Erro data:', error.response.data);
-                }
             }
         };
 
@@ -39,12 +35,17 @@ function DispositivoList() {
         navigate(`/dispositivo/${id}`);
     }
 
+    function handleDetalhes(id) {
+        navigate(`/dispositivo/details/${id}`);
+    }
+
     const handleDelete = async (id) => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
                 console.error('Token não encontrado no localStorage');
-                return;
+                navigate('/user-login');
+                return
             }
 
             await axios.delete(`http://localhost:8080/dispositivo/${id}`, {
@@ -55,22 +56,19 @@ function DispositivoList() {
             setDispositivo(dispositivos.filter(dispositivo => dispositivo.dispositivoid !== id));
         } catch (error) {
             console.error('Erro ao deletar o dispositivo:', error);
-            if (error.response) {
-                console.error('Erro status:', error.response.status);
-                console.error('Erro data:', error.response.data);
-            }
         }
     };
 
     return (
         <div>
-            <h1>Lista de Dispositivos</h1>
+            <h1 className="pagination justify-content-center mt-4">Lista de Dispositivos</h1>
+            <button className="btn btn-primary mt-4" onClick={() => navigate('/dispositivo/new')}>Adicionar Dispositivo</button>
             <table className="table table-striped">
                 <thead>
                     <tr>
                         <th>Nome</th>
                         <th>Descrição</th>
-                        <th>Localização</th> 
+                        <th>Localização</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -81,14 +79,21 @@ function DispositivoList() {
                             <td>{dispositivo.descricao}</td>
                             <td>{dispositivo.localizacao}</td>
                             <td>
-                                <button 
-                                    className="btn btn-secondary" 
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => handleDetalhes(dispositivo.dispositivoid)}
+                                >
+                                    Detalhes
+                                </button>
+                                <button
+                                    className="btn btn-success mx-1"
                                     onClick={() => handleEdit(dispositivo.dispositivoid)}
                                 >
                                     Editar
                                 </button>
-                                <button 
-                                    className="btn btn-secondary mx-1" 
+                                <button
+                                    className="btn btn-danger"
                                     onClick={() => handleDelete(dispositivo.dispositivoid)}
                                 >
                                     Deletar
@@ -98,7 +103,6 @@ function DispositivoList() {
                     ))}
                 </tbody>
             </table>
-            <button onClick={() => navigate('/dispositivo/new')}>Adicionar Dispositivo</button>
         </div>
     );
 }

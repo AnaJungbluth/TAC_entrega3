@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-function LoginUser() {
+function LoginUser({ setIsAuthenticated }) {
     const [username, setEmail] = useState('');
     const [password, setSenha] = useState('');
     const navigate = useNavigate();
@@ -21,9 +21,8 @@ function LoginUser() {
             // Salvar o token ou indicar o usuário logado
             const { token, userId } = response.data;
             localStorage.setItem('token', token);
-            localStorage.setItem('userId', userId);
-            console.log('Token ' + token);
-            console.log('id ' + userId);
+            localStorage.setItem('userId', userId)
+            setIsAuthenticated(true);
             navigate('/'); // Navega para a página inicial ou para outra rota após o sucesso
         } catch (error) {
             console.error('Erro ao fazer login:', error);
@@ -37,30 +36,35 @@ function LoginUser() {
 
     return (
         <div>
-            <h1>Login</h1>
+            <h1 className="pagination justify-content-center mt-4">Login</h1>
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="email">Email:</label>
-                    <input
+                <fieldset className="form-group">
+                    <label className="form-label" htmlFor="email">Email:</label>
+                    <input className="form-control"
                         type="email"
                         id="email"
                         name="email"
                         value={username}
                         onChange={(e) => setEmail(e.target.value)}
                     />
-                </div>
-                <div>
-                    <label htmlFor="senha">Senha:</label>
-                    <input
+                </fieldset>
+
+                <fieldset className="form-group">
+                    <label className="form-label" htmlFor="senha">Senha:</label>
+                    <input className="form-control"
                         type="password"
                         id="senha"
                         name="senha"
                         value={password}
                         onChange={(e) => setSenha(e.target.value)}
                     />
+                </fieldset>
+
+                <div className="pagination justify-content-center mt-4">
+                    <button className="btn btn-success me-1" type="submit">Entrar</button>
+                    <button className="btn btn-secondary" type="button" onClick={handleCancel}>Cancelar</button>
                 </div>
-                <button type="submit">Entrar</button>
-                <button type="button" onClick={handleCancel}>Cancelar</button>
+                
             </form>
         </div>
     );
