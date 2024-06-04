@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { Modal, Button } from 'react-bootstrap';
 
 function DispositivoForm() {
   const [nome, setName] = useState('');
@@ -8,6 +9,9 @@ function DispositivoForm() {
   const [localizacao, setLocalizacao] = useState('');
   const [gateways, setGateways] = useState([]);
   const [selectedGateway, setSelectedGateway] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState('');
   const navigate = useNavigate();
   const { id } = useParams(); // Pegando o parâmetro da URL
 
@@ -15,13 +19,14 @@ function DispositivoForm() {
     const fetchGateways = async () => {
       try {
         const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId')
         if (!token) {
-          console.error('Token de autenticação não encontrado.');
-          return;
+          handleShowErrorModal('Token não encontrado no localStorage');
+          setTimeout(() => navigate('/user-login'), 2000);
         }
 
         // Buscar os gateways cadastrados
-        const response = await axios.get('http://localhost:8080/gateway', {
+        const response = await axios.get(`http://localhost:8080/gateway/user/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -29,7 +34,13 @@ function DispositivoForm() {
 
         setGateways(response.data);
       } catch (error) {
-        console.error('Erro ao buscar gateways:', error);
+        if (error.response && error.response.status === 401) {
+          handleShowErrorModal('Erro de autenticação');
+          setTimeout(() => navigate('/user-login'), 2000);
+        } else {
+          //console.error('Erro ao buscar gateways:', error);
+          setErrorMessage('Erro ao buscar gateways. Tente novamente mais tarde.');
+        }
       }
     };
 
@@ -40,8 +51,8 @@ function DispositivoForm() {
         try {
           const token = localStorage.getItem('token');
           if (!token) {
-            console.error('Token de autenticação não encontrado.');
-            return;
+            handleShowErrorModal('Token não encontrado no localStorage');
+            setTimeout(() => navigate('/user-login'), 2000);
           }
 
           const response = await axios.get(`http://localhost:8080/dispositivo/${id}`, {
@@ -55,7 +66,13 @@ function DispositivoForm() {
           setLocalizacao(response.data.localizacao);
           setSelectedGateway(response.data.gatewayid);
         } catch (error) {
-          console.error('Erro ao buscar o dispositivo:', error);
+          if (error.response && error.response.status === 401) {
+            handleShowErrorModal('Erro de autenticação');
+            setTimeout(() => navigate('/user-login'), 2000);
+          } else {
+            //console.error('Erro ao buscar o dispositivo:', error);
+            setErrorMessage('Erro ao buscar o dispositivo. Tente novamente mais tarde.');
+          }
         }
       };
 
@@ -67,15 +84,15 @@ function DispositivoForm() {
     event.preventDefault();
 
     if (!nome || !descricao || !localizacao || !selectedGateway) {
-      console.error('Todos os campos são obrigatórios');
+      setErrorMessage('Todos os campos são obrigatórios');
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error('Token de autenticação não encontrado.');
-        navigate('/user-login');
+        handleShowErrorModal('Token não encontrado no localStorage');
+        setTimeout(() => navigate('/user-login'), 2000);
       }
 
       const payload = { nome, descricao, localizacao, gatewayid: selectedGateway };
@@ -102,7 +119,13 @@ function DispositivoForm() {
       console.log('Dispositivo salvo com sucesso:', response.data);
       navigate('/dispositivo'); // Navega para a página inicial ou para outra rota após o sucesso
     } catch (error) {
-      console.error('Erro ao salvar o dispositivo:', error);
+      if (error.response && error.response.status === 401) {
+        handleShowErrorModal('Erro de autenticação');
+        setTimeout(() => navigate('/user-login'), 2000);
+      } else {
+        //console.error('Erro ao salvar o dispositivo:', error);
+        setErrorMessage('Erro ao salvar o dispositivo. Tente novamente mais tarde.');
+      }
     }
   };
 
@@ -110,11 +133,21 @@ function DispositivoForm() {
     navigate('/dispositivo'); // Navega para a página inicial ou para outra rota ao cancelar
   };
 
+  const handleShowErrorModal = (message) => {
+    setErrorModalMessage(message);
+    setShowErrorModal(true);
+  };
+
   return (
     <div>
       <h1 className="pagination justify-content-center mt-4">{id ? 'Editar Dispositivo' : 'Cadastrar Dispositivo'}</h1>
+      {errorMessage && (
+        <div className="alert alert-danger" role="alert">
+          {errorMessage}
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
-      <fieldset className="form-group">
+        <fieldset className="form-group">
           <label className="form-label" htmlFor="name">Nome:</label>
           <input className="form-control"
             type="text"
@@ -161,13 +194,25 @@ function DispositivoForm() {
               <option key={gateway.gatewayid} value={gateway.gatewayid}>{gateway.nome}</option>
             ))}
           </select>
-          </fieldset>
+        </fieldset>
 
         <div className="pagination justify-content-center mt-4">
           <button className="btn btn-success me-1" type="submit">{id ? 'Salvar' : 'Enviar'}</button>
           <button className="btn btn-secondary" type="button" onClick={handleCancel}>Cancelar</button>
         </div>
       </form>
+
+      <Modal show={showErrorModal} onHide={() => setShowErrorModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Erro</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{errorModalMessage}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowErrorModal(false)}>
+            Fechar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from './Deshboard';
+import { Modal, Button } from 'react-bootstrap';
+
 
 const InformacoesDashboard = () => {
   const [dispositivos, setDispositivos] = useState([]);
   const navigate = useNavigate();
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const id = localStorage.getItem('userId'); // Obtém o ID do usuário autenticado do armazenamento local
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      navigate('/user-login');
-      return;
+      handleShowErrorModal('Token não encontrado no localStorage');
+      setTimeout(() => navigate('/user-login'), 2000);
     }
 
     const fetchDispositivo = async () => {
@@ -22,17 +27,22 @@ const InformacoesDashboard = () => {
           }
         });
         if (!response.ok) {
-          throw new Error('Erro ao buscar dispositivos');
+          setErrorMessage('Erro ao buscar dispositivos');
         }
         const data = await response.json();
         setDispositivos(data);
       } catch (error) {
-        console.error('Erro:', error);
+        setErrorMessage('Erro');
       }
     };
 
     fetchDispositivo();
   }, [id]);
+
+  const handleShowErrorModal = (message) => {
+    setErrorModalMessage(message);
+    setShowErrorModal(true);
+  };
 
   return (
     <div className="container mt-5">
@@ -61,6 +71,18 @@ const InformacoesDashboard = () => {
           ))
         )}
       </div>
+
+      <Modal show={showErrorModal} onHide={() => setShowErrorModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Erro</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{errorModalMessage}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowErrorModal(false)}>
+            Fechar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

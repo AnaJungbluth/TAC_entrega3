@@ -10,10 +10,11 @@ import {
   PointElement,
   TimeScale
 } from 'chart.js';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, TimeScale);
 
-const ReadingsGraphic = ({ sensorid }) => {
+const Dashboard = ({ sensorid }) => {
   const [chartData, setChartData] = useState({ datasets: [] });
   const [sensorName, setSensorName] = useState('');
   const [error, setError] = useState(null);
@@ -50,10 +51,11 @@ const ReadingsGraphic = ({ sensorid }) => {
           labels: labels,
           datasets: [
             {
-              label: `Leituras ${data.nome}`, // Usa o nome do sensor no label do gráfico
+              label: `Leitura ${data.nome}`, // Usa o nome do sensor no label do gráfico
               data: valores,
-              borderColor: 'rgba(0, 0, 255, 1)',
-              borderWidth: 1
+              borderColor: 'rgba(255, 165, 0, 1)',
+              borderWidth: 1,
+              pointBackgroundColor: 'rgba(255, 165, 0, 1)'
             }
           ]
         });
@@ -66,23 +68,42 @@ const ReadingsGraphic = ({ sensorid }) => {
   }, [sensorid, navigate]);
 
   return (
-    <div style={{ width: '80%', margin: '0 auto' }}>
-      <h2>Leituras {sensorName}</h2> {/* Usa o nome do sensor no título */}
-      {error ? <p>Error: {error}</p> : <Line data={chartData} options={{
-        scales: {
-          x: {
-            type: 'time',
-            time: {
-              unit: 'day'
-            }
-          },
-          y: {
-            beginAtZero: true
-          }
-        }
-      }} />}
+    <div className="container mt-3">
+      <div className="card shadow-sm">
+      <div className="card-header bg-primary text-white">
+          <h2 className=" my-2" style={{ fontSize: '1.5rem', fontWeight: '400' }}>
+            Sensor {sensorName}
+          </h2> {/* Usa o nome do sensor no título */}
+        </div>
+        <div className="card-body">
+          {error ? (
+            <div className="alert alert-danger" role="alert">
+              Error: {error}
+            </div>
+          ) : (
+            <div className="chart-container" style={{ position: 'relative', height: '50vh' }}>
+              <Line
+                data={chartData}
+                options={{
+                  scales: {
+                    x: {
+                      type: 'time',
+                      time: {
+                        unit: 'day'
+                      }
+                    },
+                    y: {
+                      beginAtZero: true
+                    }
+                  }
+                }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default ReadingsGraphic;
+export default Dashboard;

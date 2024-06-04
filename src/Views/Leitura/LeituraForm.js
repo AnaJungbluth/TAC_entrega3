@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { Modal, Button } from 'react-bootstrap';
+
 
 function LeituraForm() {
   const [valor, setValor] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState('');
   const navigate = useNavigate();
   const { id } = useParams(); // Pegando o parâmetro da URL
 
@@ -12,8 +17,8 @@ function LeituraForm() {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          console.error('Token de autenticação não encontrado.');
-          return;
+          handleShowErrorModal('Token não encontrado no localStorage');
+          setTimeout(() => navigate('/user-login'), 2000);
         }
 
         // Buscar os dispositivos cadastrados
@@ -23,7 +28,13 @@ function LeituraForm() {
           },
         });
       } catch (error) {
-        console.error('Erro ao buscar sensores:', error);
+        if (error.response && error.response.status === 401) {
+          handleShowErrorModal('Erro de autenticação');
+          setTimeout(() => navigate('/user-login'), 2000);
+        } else {
+          //console.error('Erro ao buscar sensores:', error);
+          setErrorMessage('Erro ao buscar sensores. Tente novamente mais tarde.');
+        }
       }
     };
 
@@ -34,8 +45,8 @@ function LeituraForm() {
         try {
           const token = localStorage.getItem('token');
           if (!token) {
-            console.error('Token de autenticação não encontrado.');
-            return;
+            handleShowErrorModal('Token não encontrado no localStorage');
+            setTimeout(() => navigate('/user-login'), 2000);
           }
 
           const response = await axios.get(`http://localhost:8080/leitura/${id}`, {
@@ -46,7 +57,14 @@ function LeituraForm() {
 
           setValor(response.data.valor);
         } catch (error) {
-          console.error('Erro ao buscar o leitura:', error);
+          if (error.response && error.response.status === 401) {
+            handleShowErrorModal('Erro de autenticação');
+            setTimeout(() => navigate('/user-login'), 2000);
+          } else {
+            //console.error('Erro ao buscar o leitura:', error);
+            setErrorMessage('Erro ao buscar o leitura. Tente novamente mais tarde.');
+          }
+
         }
       };
 
@@ -58,7 +76,7 @@ function LeituraForm() {
     event.preventDefault();
 
     if (!valor) {
-      console.error('Todos os campos são obrigatórios');
+      setErrorMessage('Todos os campos são obrigatórios');
       return;
     }
 
@@ -67,8 +85,8 @@ function LeituraForm() {
       const idSensor = localStorage.getItem('sensorId');
 
       if (!token) {
-        console.error('Token de autenticação não encontrado.');
-        navigate('/user-login');
+        handleShowErrorModal('Token não encontrado no localStorage');
+        setTimeout(() => navigate('/user-login'), 2000);
       }
 
       const payload = { valor, sensorid: idSensor };
@@ -92,10 +110,17 @@ function LeituraForm() {
         });
       }
 
-      console.log('Leitura salvo com sucesso:', response.data);
+      //console.log('Leitura salvo com sucesso:', response.data);
       navigate('/leitura'); // Navega para a página inicial ou para outra rota após o sucesso
     } catch (error) {
-      console.error('Erro ao salvar o leitura:', error);
+      if (error.response && error.response.status === 401) {
+        handleShowErrorModal('Erro de autenticação');
+        setTimeout(() => navigate('/user-login'), 2000);
+      } else {
+        //console.error('Erro ao salvar o leitura:', error);
+        setErrorMessage('Erro ao salvar o leitura. Tente novamente mais tarde.');
+      }
+
     }
   };
 
@@ -103,11 +128,21 @@ function LeituraForm() {
     navigate(`/dispositivo`); // Navega para a página inicial ou para outra rota ao cancelar
   };
 
+  const handleShowErrorModal = (message) => {
+    setErrorModalMessage(message);
+    setShowErrorModal(true);
+  };
+
   return (
     <div>
       <h1 className="pagination justify-content-center mt-4">{id ? 'Editar Leitura' : 'Cadastrar Leitura'}</h1>
+      {errorMessage && (
+        <div className="alert alert-danger" role="alert">
+          {errorMessage}
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
-      <fieldset className="form-group">
+        <fieldset className="form-group">
           <label className="form-label" htmlFor="name">Valor:</label>
           <input className="form-control"
             type="text"
@@ -123,6 +158,18 @@ function LeituraForm() {
           <button className="btn btn-secondary" type="button" onClick={handleCancel}>Cancelar</button>
         </div>
       </form>
+
+      <Modal show={showErrorModal} onHide={() => setShowErrorModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Erro</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{errorModalMessage}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowErrorModal(false)}>
+            Fechar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

@@ -20,11 +20,11 @@ function AppContent({ setIsAuthenticated }) {
   return (
     <>
       <hr />
-      <main>
+      <main className="main">
         <AppRoutes setIsAuthenticated={setIsAuthenticated} />
       </main>
       <hr />
-      <footer>Feito na UTF-MD</footer>
+      <footer className="pagination justify-content-center mt-2 mb-2">Feito na UTF-MD</footer>
     </>
   );
 }

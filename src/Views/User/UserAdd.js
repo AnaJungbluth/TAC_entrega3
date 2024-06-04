@@ -1,15 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Modal, Button } from 'react-bootstrap';
+
 
 function UserAdd() {
   const [nome, setName] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!nome || !email || !senha) {
+      setErrorMessage('Todos os campos são obrigatórios');
+      return;
+    }
 
     try {
       const response = await axios.post('http://localhost:8080/pessoa', {
@@ -17,22 +27,35 @@ function UserAdd() {
         email,
         senha
       });
-      console.log('Usuário salvo com sucesso:', response.data);
-      navigate('/user-login'); // Navega para a página inicial ou para outra rota após o sucesso
+      handleShowModal('Usuário salvo com sucesso!');
+      // Atraso para mostrar o modal antes de navegar
+      setTimeout(() => navigate('/user-login'), 2000);
     } catch (error) {
-      console.error('Erro ao salvar o usuário:', error);
+      //console.error('Erro ao salvar o usuário:', error);
+      setErrorMessage('Erro ao salvar o usuário. Por favor, tente novamente.'); // Define a mensagem de erro
     }
   };
 
   const handleCancel = () => {
-    navigate('/'); 
+    navigate('/');
   };
+
+  const handleShowModal = (message) => {
+    setSuccessMessage(message);
+    setShowModal(true);
+  };
+
 
   return (
     <div>
       <h1 className="pagination justify-content-center mt-4">Cadastrar Usuário</h1>
+      {errorMessage && (
+        <div className="alert alert-danger" role="alert">
+          {errorMessage}
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
-      <fieldset className="form-group">
+        <fieldset className="form-group">
           <label className="form-label" htmlFor="name">Nome:</label>
           <input className="form-control"
             type="text"
@@ -70,6 +93,18 @@ function UserAdd() {
           <button type="button" className="btn btn-secondary" onClick={handleCancel}>Cancelar</button>
         </div>
       </form>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Sucesso</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{successMessage}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Fechar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
